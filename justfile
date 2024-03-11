@@ -4,7 +4,7 @@ cmd := "." / "cmd" / binary
 output := "." / build_dir / binary
 
 # do the thing
-default: test run
+default: test check build install
 
 # build binary
 build:
@@ -33,3 +33,7 @@ clean:
 # run go tests
 test:
 	go test ./...
+
+# run linter
+check:
+	staticcheck ./...
