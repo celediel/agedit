@@ -21,4 +21,4 @@ open an age encrypted file in $EDITOR
 ## library
 `go get git.burning.moe/celediel/agedit@latest`
 
-See `./cmd/agedit/agedit.go` for example usage.
+See `./cmd/agedit` for example usage.
