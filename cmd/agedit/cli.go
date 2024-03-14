@@ -115,7 +115,7 @@ func before(ctx *cli.Context) error {
 
 	// load config from file
 	_, err := os.Open(configFile)
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
+	if err != nil && errors.Is(err, os.ErrNotExist) {
 		// or not
 		logger.Debug("couldn't load config file", "file", configFile)
 	} else {
