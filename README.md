@@ -1,6 +1,6 @@
 # agedit
 
-open an age encrypted file in $EDITOR
+open an [age](https://github.com/FiloSottile/age) encrypted file in $EDITOR
 
 ## cli
 `go install git.burning.moe/celediel/agedit/cmd/agedit@latest`
