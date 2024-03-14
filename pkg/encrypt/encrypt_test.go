@@ -75,7 +75,7 @@ func TestEncryptionDecryption(t *testing.T) {
 
 // TestNewIdentity creats a new identity, writes it to file, then re-reads it back from the file.
 func TestNewIdentity(t *testing.T) {
-	for range 1000 {
+	for i := 0; i <= 1000; i++ {
 		outfile := generator.GenerateFullPath()
 
 		identity, err := NewIdentity()

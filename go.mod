@@ -1,6 +1,6 @@
 module git.burning.moe/celediel/agedit
 
-go 1.22.0
+go 1.21.0
 
 require (
 	filippo.io/age v1.1.1

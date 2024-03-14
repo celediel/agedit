@@ -12,7 +12,7 @@ var generator = NewGenerator("test_", ".txt", 18)
 func TestCanCreateTmpFile(t *testing.T) {
 	b := []byte{104, 101, 108, 108, 111, 32, 116, 104, 101, 114, 101}
 
-	for range 1000 {
+	for i := 0; i <= 1000; i++ {
 		outfile := generator.GenerateFullPath()
 		err := os.WriteFile(outfile, b, fs.FileMode(0600))
 		if err != nil {
@@ -33,7 +33,7 @@ func TestCanCreateTmpFile(t *testing.T) {
 func TestUniqueTmpFile(t *testing.T) {
 	var generated_names = map[string]string{}
 
-	for range 100000 {
+	for i := 0; i <= 100000; i++ {
 		name := generator.GenerateName()
 		if val, ok := generated_names[name]; ok {
 			t.Fatal("Non unique name", val)
