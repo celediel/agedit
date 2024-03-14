@@ -78,16 +78,24 @@ func GetDataDir(appname string) string {
 //
 // returns %TEMP% on Windows, /tmp on UNIX-like systems
 func GetTempDirectory() string {
+	var tmp string
 	switch runtime.GOOS {
 	case "windows":
-		return os.Getenv("TEMP")
+		tmp = os.Getenv("TEMP")
+	case "android":
+		if t := os.Getenv("TMPDIR"); t != "" {
+			tmp = t
+		} else if t = os.Getenv("PREFIX"); t != "" {
+			tmp = t + "/tmp"
+		}
 	default:
 		fallthrough
 	case "darwin":
 		fallthrough
 	case "linux":
-		return "/tmp"
+		tmp = "/tmp"
 	}
+	return tmp
 }
 
 func make_path(paths ...string) string {
