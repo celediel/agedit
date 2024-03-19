@@ -49,8 +49,8 @@ var (
 			Name:    "identity",
 			Usage:   "age identity file to use",
 			Aliases: []string{"i"},
-			Action: func(ctx *cli.Context, s string) error {
-				if identity_file := ctx.String("identity"); identity_file != "" {
+			Action: func(ctx *cli.Context, identity_file string) error {
+				if identity_file != "" {
 					cfg.IdentityFile = identity_file
 				}
 				return nil
@@ -60,8 +60,8 @@ var (
 			Name:    "out",
 			Usage:   "write to this file instead of the input file",
 			Aliases: []string{"o"},
-			Action: func(ctx *cli.Context, s string) error {
-				output_file = ctx.String("out")
+			Action: func(ctx *cli.Context, out string) error {
+				output_file = out
 				return nil
 			},
 		},
@@ -71,7 +71,7 @@ var (
 			Value:   "warn",
 			Aliases: []string{"l"},
 			Action: func(ctx *cli.Context, s string) error {
-				if lvl, err := log.ParseLevel(ctx.String("log")); err == nil {
+				if lvl, err := log.ParseLevel(s); err == nil {
 					logger.SetLevel(lvl)
 					// Some extra info for debug level
 					if logger.GetLevel() == log.DebugLevel {
@@ -87,8 +87,8 @@ var (
 			Name:    "editor",
 			Usage:   "specify the editor to use",
 			Aliases: []string{"e"},
-			Action: func(ctx *cli.Context, s string) error {
-				cfg.Editor = ctx.String("editor")
+			Action: func(ctx *cli.Context, editor string) error {
+				cfg.Editor = editor
 				return nil
 			},
 		},
