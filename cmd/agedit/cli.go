@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -17,10 +18,10 @@ import (
 )
 
 const (
-	name          = "agedit"
-	usage         = "Edit age encrypted files with your $EDITOR"
-	version       = "0.0.2"
-	help_template = `NAME:
+	name          string = "agedit"
+	usage         string = "Edit age encrypted files with your $EDITOR"
+	version       string = "0.0.2"
+	help_template string = `NAME:
    {{.Name}} {{if .Version}}v{{.Version}}{{end}} - {{.Usage}}
 
 USAGE:
@@ -47,7 +48,7 @@ var (
 	flags = []cli.Flag{
 		&cli.StringFlag{
 			Name:    "identity",
-			Usage:   "age identity file to use",
+			Usage:   "age identity file to decrypt with",
 			Aliases: []string{"i"},
 			Action: func(ctx *cli.Context, identity_file string) error {
 				if identity_file != "" {
@@ -99,23 +100,22 @@ var (
 func before(ctx *cli.Context) error {
 	// check input
 	if input_file = strings.Join(ctx.Args().Slice(), " "); input_file == "" {
-		return errors.New("no file to edit, use agedit -h for help")
+		return fmt.Errorf("no file to edit, use " + name + " -h for help")
 	}
 
 	// do some setup
 	cfg = config.Defaults
 	cfg.Editor = env.GetEditor()
-	cfg_dir := env.GetConfigDir("agedit")
+	cfg_dir := env.GetConfigDir(name)
 	cfg.IdentityFile = cfg_dir + "identity.key"
-	configFile = cfg_dir + "agedit.yaml"
+	configFile = cfg_dir + name + ".yaml"
 	logger = log.NewWithOptions(os.Stderr, log.Options{
 		ReportTimestamp: true,
 		TimeFormat:      time.TimeOnly,
 	})
 
 	// load config from file
-	_, err := os.Open(configFile)
-	if err != nil && errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(configFile); err != nil && errors.Is(err, os.ErrNotExist) {
 		// or not
 		logger.Debug("couldn't load config file", "file", configFile)
 	} else {
@@ -130,7 +130,7 @@ func before(ctx *cli.Context) error {
 
 // action does the actual thing
 func action(ctx *cli.Context) error {
-	if _, err := os.Open(input_file); os.IsNotExist(err) {
+	if _, err := os.Stat(input_file); os.IsNotExist(err) {
 		return err
 	}
 
@@ -139,8 +139,8 @@ func action(ctx *cli.Context) error {
 		logger.Debug("out file not specified, using input", "outfile", output_file)
 	}
 
-	if _, err := os.Open(cfg.IdentityFile); os.IsNotExist(err) {
-		return errors.New("identity file unset, use -i or set one in the config file")
+	if _, err := os.Stat(cfg.IdentityFile); os.IsNotExist(err) {
+		return fmt.Errorf("identity file unset, use -i or set one in the config file")
 	}
 
 	if id, err := encrypt.ReadIdentityFromFile(cfg.IdentityFile); err != nil {
