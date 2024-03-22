@@ -66,6 +66,15 @@ var (
 				return nil
 			},
 		},
+		&cli.BoolFlag{
+			Name:    "force",
+			Usage:   "Re-encrypt the file even if no changes have been made.",
+			Aliases: []string{"f"},
+			Action: func(ctx *cli.Context, b bool) error {
+				force_overwrite = b
+				return nil
+			},
+		},
 		&cli.StringFlag{
 			Name:    "log",
 			Usage:   "log level",
@@ -162,7 +171,8 @@ func action(ctx *cli.Context) error {
 	}
 	logger.Debug("got data back from editor")
 
-	if string(edited) == string(decrypted) {
+	// don't overwrite same data, unless specified
+	if string(edited) == string(decrypted) && !force_overwrite {
 		logger.Warn("No edits made, not writing " + output_file)
 		return nil
 	}

@@ -17,6 +17,7 @@ var (
 	configFile string
 
 	input_file, output_file string
+	force_overwrite         bool
 )
 
 func main() {
