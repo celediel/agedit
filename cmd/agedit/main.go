@@ -12,14 +12,15 @@ import (
 )
 
 var (
-	identities              []age.Identity
-	recipients              []age.Recipient
-	logger                  *log.Logger
-	cfg                     config.Config
-	edt                     editor.Editor
-	configFile              string
-	input_file, output_file string
-	force_overwrite         bool
+	identities                       []age.Identity
+	recipients                       []age.Recipient
+	logger                           *log.Logger
+	cfg                              config.Config
+	edt                              editor.Editor
+	configFile                       string
+	input_file, output_file          string
+	force_overwrite                  bool
+	gave_identities, gave_recipients bool
 )
 
 func main() {

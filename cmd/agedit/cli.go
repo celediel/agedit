@@ -60,6 +60,7 @@ var (
 
 					identities = append(identities, id)
 				}
+				gave_identities = true
 				return nil
 			},
 		},
@@ -87,6 +88,7 @@ var (
 					}
 					recipients = append(recipients, r)
 				}
+				gave_recipients = true
 				return nil
 			},
 		},
@@ -204,7 +206,7 @@ func action(ctx *cli.Context) error {
 	}
 
 	// read from identity file if exists and no identities have been supplied
-	if len(identities) == 0 {
+	if !gave_identities {
 		if _, err := os.Stat(cfg.IdentityFile); os.IsNotExist(err) {
 			return fmt.Errorf("identity file unset and no identities supplied, use -i to specify an idenitity file or set one in the config file, or use -I to specify an age private key")
 		} else {
@@ -221,7 +223,7 @@ func action(ctx *cli.Context) error {
 	}
 
 	// read from recipient file if it exists and no recipients have been supplied
-	if len(recipients) == 0 {
+	if !gave_recipients && cfg.RecipientFile != "" {
 		if _, err := os.Stat(cfg.RecipientFile); os.IsNotExist(err) {
 			return fmt.Errorf("recipient file doesn't exist")
 		} else {
