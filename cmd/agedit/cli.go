@@ -66,6 +66,14 @@ var (
 				return nil
 			},
 		},
+		&cli.StringSliceFlag{
+			Name:  "editor-args",
+			Usage: "`arg`uments to send to the editor",
+			Action: func(ctx *cli.Context, args []string) error {
+				cfg.EditorArgs = args
+				return nil
+			},
+		},
 		&cli.BoolFlag{
 			Name:    "force",
 			Usage:   "Re-encrypt the file even if no changes have been made.",
@@ -134,6 +142,9 @@ func before(ctx *cli.Context) error {
 		}
 	}
 
+	// setup editor with loaded config options
+	edt = editor.New(cfg.Editor, cfg.EditorArgs, cfg.Prefix, cfg.Suffix, cfg.RandomLength)
+
 	return nil
 }
 
@@ -165,7 +176,8 @@ func action(ctx *cli.Context) error {
 	}
 	logger.Debug("decrypted " + input_file + " sucessfully")
 
-	edited, err := editor.EditTempFile(cfg.Editor, string(decrypted), cfg.Prefix, cfg.Suffix, cfg.RandomLength)
+	// open decrypted data in the editor
+	edited, err := edt.EditTempFile(string(decrypted))
 	if err != nil {
 		return err
 	}

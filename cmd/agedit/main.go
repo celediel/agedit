@@ -16,6 +16,7 @@ var (
 	cfg        config.Config
 	configFile string
 
+	edt                     editor.Editor
 	input_file, output_file string
 	force_overwrite         bool
 )
