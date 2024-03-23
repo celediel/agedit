@@ -21,7 +21,7 @@ import (
 const (
 	name          string = "agedit"
 	usage         string = "Edit age encrypted files with your $EDITOR"
-	version       string = "0.1.0"
+	version       string = "0.1.1"
 	help_template string = `NAME:
    {{.Name}} {{if .Version}}v{{.Version}}{{end}} - {{.Usage}}
 
