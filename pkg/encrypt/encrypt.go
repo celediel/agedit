@@ -11,18 +11,18 @@ import (
 )
 
 // Encrypt encrypts bytes into filename
-func Encrypt(data []byte, filename string, identity *age.X25519Identity) error {
+func Encrypt(data []byte, filename string, recipients ...age.Recipient) error {
 	var (
 		w   io.WriteCloser
 		out = &bytes.Buffer{}
 		err error
 	)
 
-	if identity == nil {
-		return errors.New("nil identity??")
+	if len(recipients) == 0 {
+		return errors.New("no recepients? who's trying to encrypt?")
 	}
 
-	if w, err = age.Encrypt(out, identity.Recipient()); err != nil {
+	if w, err = age.Encrypt(out, recipients...); err != nil {
 		return err
 	}
 
@@ -40,7 +40,7 @@ func Encrypt(data []byte, filename string, identity *age.X25519Identity) error {
 }
 
 // Decrypt decrypts bytes from filename
-func Decrypt(filename string, identity *age.X25519Identity) ([]byte, error) {
+func Decrypt(filename string, identities ...age.Identity) ([]byte, error) {
 	var (
 		f   *os.File
 		r   io.Reader
@@ -51,7 +51,7 @@ func Decrypt(filename string, identity *age.X25519Identity) ([]byte, error) {
 		return nil, err
 	}
 
-	if r, err = age.Decrypt(f, identity); err != nil {
+	if r, err = age.Decrypt(f, identities...); err != nil {
 		return nil, err
 	}
 

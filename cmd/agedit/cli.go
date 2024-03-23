@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"filippo.io/age"
 	"git.burning.moe/celediel/agedit/internal/config"
 	"git.burning.moe/celediel/agedit/pkg/editor"
 	"git.burning.moe/celediel/agedit/pkg/encrypt"
@@ -46,23 +47,75 @@ var (
 	}}
 
 	flags = []cli.Flag{
-		&cli.StringFlag{
+		&cli.StringSliceFlag{
 			Name:    "identity",
-			Usage:   "age identity file to decrypt with",
+			Usage:   "age `identity` (or identities) to decrypt with",
+			Aliases: []string{"I"},
+			Action: func(ctx *cli.Context, inputs []string) error {
+				for _, input := range inputs {
+					id, err := age.ParseX25519Identity(input)
+					if err != nil {
+						return err
+					}
+
+					identities = append(identities, id)
+				}
+				return nil
+			},
+		},
+		&cli.PathFlag{ // I dunno why PathFlag exists because cli.Path is just string
+			Name:    "identity-file",
+			Usage:   "read identity from `FILE`",
 			Aliases: []string{"i"},
-			Action: func(ctx *cli.Context, identity_file string) error {
+			Action: func(ctx *cli.Context, identity_file cli.Path) error {
 				if identity_file != "" {
 					cfg.IdentityFile = identity_file
 				}
 				return nil
 			},
 		},
+		&cli.StringSliceFlag{
+			Name:    "recipient",
+			Usage:   "age `recipient`s to encrypt to",
+			Aliases: []string{"R"},
+			Action: func(ctx *cli.Context, inputs []string) error {
+				for _, input := range inputs {
+					logger.Debugf("parsing public key from string %s", input)
+					r, err := age.ParseX25519Recipient(input)
+					if err != nil {
+						return err
+					}
+					recipients = append(recipients, r)
+				}
+				return nil
+			},
+		},
+		&cli.PathFlag{
+			Name:    "recipient-file",
+			Usage:   "read recipients from `FILE`",
+			Aliases: []string{"r"},
+			Action: func(ctx *cli.Context, recipient_file cli.Path) error {
+				if recipient_file != "" {
+					cfg.RecipientFile = recipient_file
+				}
+				return nil
+			},
+		},
 		&cli.StringFlag{
 			Name:    "out",
-			Usage:   "write to this file instead of the input file",
+			Usage:   "write to `FILE` instead of the input file",
 			Aliases: []string{"o"},
 			Action: func(ctx *cli.Context, out string) error {
 				output_file = out
+				return nil
+			},
+		},
+		&cli.StringFlag{
+			Name:    "editor",
+			Usage:   "edit with specified `EDITOR` instead of $EDITOR",
+			Aliases: []string{"e"},
+			Action: func(ctx *cli.Context, editor string) error {
+				cfg.Editor = editor
 				return nil
 			},
 		},
@@ -76,7 +129,7 @@ var (
 		},
 		&cli.BoolFlag{
 			Name:    "force",
-			Usage:   "Re-encrypt the file even if no changes have been made.",
+			Usage:   "re-encrypt the file even if no changes have been made.",
 			Aliases: []string{"f"},
 			Action: func(ctx *cli.Context, b bool) error {
 				force_overwrite = b
@@ -84,10 +137,9 @@ var (
 			},
 		},
 		&cli.StringFlag{
-			Name:    "log",
-			Usage:   "log level",
-			Value:   "warn",
-			Aliases: []string{"l"},
+			Name:  "log",
+			Usage: "log `level`",
+			Value: "warn",
 			Action: func(ctx *cli.Context, s string) error {
 				if lvl, err := log.ParseLevel(s); err == nil {
 					logger.SetLevel(lvl)
@@ -101,15 +153,6 @@ var (
 				return nil
 			},
 		},
-		&cli.StringFlag{
-			Name:    "editor",
-			Usage:   "specify the editor to use",
-			Aliases: []string{"e"},
-			Action: func(ctx *cli.Context, editor string) error {
-				cfg.Editor = editor
-				return nil
-			},
-		},
 	}
 )
 
@@ -120,7 +163,7 @@ func before(ctx *cli.Context) error {
 		return fmt.Errorf("no file to edit, use " + name + " -h for help")
 	}
 
-	// do some setup
+	// set some defaults
 	cfg = config.Defaults
 	cfg.Editor = env.GetEditor()
 	cfg_dir := env.GetConfigDir(name)
@@ -150,6 +193,7 @@ func before(ctx *cli.Context) error {
 
 // action does the actual thing
 func action(ctx *cli.Context) error {
+	// make sure input file exists
 	if _, err := os.Stat(input_file); os.IsNotExist(err) {
 		return err
 	}
@@ -159,18 +203,55 @@ func action(ctx *cli.Context) error {
 		logger.Debug("out file not specified, using input", "outfile", output_file)
 	}
 
-	if _, err := os.Stat(cfg.IdentityFile); os.IsNotExist(err) {
-		return fmt.Errorf("identity file unset, use -i or set one in the config file")
+	// read from identity file if exists and no identities have been supplied
+	if len(identities) == 0 {
+		if _, err := os.Stat(cfg.IdentityFile); os.IsNotExist(err) {
+			return fmt.Errorf("identity file unset and no identities supplied, use -i to specify an idenitity file or set one in the config file, or use -I to specify an age private key")
+		} else {
+			f, err := os.Open(cfg.IdentityFile)
+			if err != nil {
+				return fmt.Errorf("couldn't open identity file: %v", err)
+			}
+			if ids, err := age.ParseIdentities(f); err != nil {
+				return fmt.Errorf("couldn't parse identities: %v", err)
+			} else {
+				identities = append(identities, ids...)
+			}
+		}
 	}
 
-	if id, err := encrypt.ReadIdentityFromFile(cfg.IdentityFile); err != nil {
-		return err
-	} else {
-		identity = id
+	// read from recipient file if it exists and no recipients have been supplied
+	if len(recipients) == 0 {
+		if _, err := os.Stat(cfg.RecipientFile); os.IsNotExist(err) {
+			return fmt.Errorf("recipient file doesn't exist")
+		} else {
+			f, err := os.Open(cfg.RecipientFile)
+			if err != nil {
+				return fmt.Errorf("couldn't open recipient file: %v", err)
+			}
+			if rs, err := age.ParseRecipients(f); err != nil {
+				return fmt.Errorf("couldn't parse recipients: %v", err)
+			} else {
+				recipients = append(recipients, rs...)
+			}
+		}
 	}
-	logger.Debug("read identity from file", "id", identity.Recipient())
 
-	decrypted, err := encrypt.Decrypt(input_file, identity)
+	// get recipients from specified identities
+	for _, id := range identities {
+		// TODO: figure out how age actually intends for
+		// TODO: a recpient to be retrieved from an age.Identity
+		// TODO: beccause this is stupid and I hate it
+		actual_id, err := age.ParseX25519Identity(fmt.Sprint(id))
+		if err != nil {
+			return fmt.Errorf("couldn't get recipient? %v", err)
+		}
+
+		recipients = append(recipients, actual_id.Recipient())
+	}
+
+	// try to decrypt the file
+	decrypted, err := encrypt.Decrypt(input_file, identities...)
 	if err != nil {
 		return err
 	}
@@ -189,7 +270,8 @@ func action(ctx *cli.Context) error {
 		return nil
 	}
 
-	err = encrypt.Encrypt(edited, output_file, identity)
+	// actually re-encrypt the data
+	err = encrypt.Encrypt(edited, output_file, recipients...)
 	if err != nil {
 		return err
 	}
