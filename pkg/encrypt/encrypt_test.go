@@ -79,7 +79,7 @@ func TestMultipleIdentities(t *testing.T) {
 		recipients []age.Recipient
 	)
 
-	for i := 0; i <= 10; i++ {
+	for range 10 {
 		id, err := age.GenerateX25519Identity()
 		if err != nil {
 			t.Fatalf("age broke: %v", err)
@@ -142,7 +142,7 @@ func TestMultipleIdentities(t *testing.T) {
 
 // TestNewIdentity creats a new identity, writes it to file, then re-reads it back from the file.
 func TestNewIdentity(t *testing.T) {
-	for i := 0; i <= 1000; i++ {
+	for range 1000 {
 		outfile := generator.GenerateFullPath()
 
 		identity, err := NewIdentity()

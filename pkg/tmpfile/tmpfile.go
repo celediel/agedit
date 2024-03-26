@@ -36,7 +36,7 @@ func NewGenerator(prefix, suffix string, length int) Generator {
 
 func randomString(set string, length int) string {
 	out := strings.Builder{}
-	for i := 0; i < length; i++ {
+	for range length {
 		out.WriteByte(randomChar(set))
 	}
 	return out.String()
