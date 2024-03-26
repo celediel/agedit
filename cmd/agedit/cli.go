@@ -130,9 +130,10 @@ var (
 			},
 		},
 		&cli.BoolFlag{
-			Name:    "force",
-			Usage:   "re-encrypt the file even if no changes have been made.",
-			Aliases: []string{"f"},
+			Name:               "force",
+			Usage:              "re-encrypt the file even if no changes have been made",
+			Aliases:            []string{"f"},
+			DisableDefaultText: true,
 			Action: func(ctx *cli.Context, b bool) error {
 				force_overwrite = b
 				return nil
