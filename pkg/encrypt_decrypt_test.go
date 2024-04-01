@@ -1,4 +1,4 @@
-package encrypt
+package encrypt_decrypt_test
 
 import (
 	"io/fs"
@@ -6,6 +6,9 @@ import (
 	"testing"
 
 	"filippo.io/age"
+	"git.burning.moe/celediel/agedit/pkg/decrypt"
+	"git.burning.moe/celediel/agedit/pkg/encrypt"
+	"git.burning.moe/celediel/agedit/pkg/identity"
 	"git.burning.moe/celediel/agedit/pkg/tmpfile"
 )
 
@@ -49,11 +52,11 @@ func TestEncryptionDecryption(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err = Encrypt(b, encrypted_outname, id.Recipient()); err != nil {
+			if err = encrypt.Encrypt(b, encrypted_outname, id.Recipient()); err != nil {
 				t.Fatal(err)
 			}
 
-			if b, err = Decrypt(encrypted_outname, id); err != nil {
+			if b, err = decrypt.Decrypt(encrypted_outname, id); err != nil {
 				t.Fatal(err)
 			}
 
@@ -105,13 +108,13 @@ func TestMultipleIdentities(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err = Encrypt(b, encrypted_outname, recipients...); err != nil {
+			if err = encrypt.Encrypt(b, encrypted_outname, recipients...); err != nil {
 				t.Fatal(err)
 			}
 
 			// try decrypting with each identity
 			for _, id := range identities {
-				if b, err = Decrypt(encrypted_outname, id); err != nil {
+				if b, err = decrypt.Decrypt(encrypted_outname, id); err != nil {
 					t.Fatal(err)
 				}
 				if string(b) != str {
@@ -120,7 +123,7 @@ func TestMultipleIdentities(t *testing.T) {
 			}
 
 			// then all of them because why not
-			if b, err = Decrypt(encrypted_outname, identities...); err != nil {
+			if b, err = decrypt.Decrypt(encrypted_outname, identities...); err != nil {
 				t.Fatal(err)
 			}
 
@@ -145,23 +148,23 @@ func TestNewIdentity(t *testing.T) {
 	for range 1000 {
 		outfile := generator.GenerateFullPath()
 
-		identity, err := NewIdentity()
+		id, err := identity.NewIdentity()
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		err = WriteIdentityToFile(identity, outfile)
+		err = identity.WriteIdentityToFile(id, outfile)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		other_identity, err := ReadIdentityFromFile(outfile)
+		other_identity, err := identity.ReadIdentityFromFile(outfile)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if identity.Recipient().String() != other_identity.Recipient().String() && identity.String() != other_identity.String() {
-			t.Fatal("Identities don't match!", identity.Recipient(), "!=", identity.Recipient())
+		if id.Recipient().String() != other_identity.Recipient().String() && id.String() != other_identity.String() {
+			t.Fatal("Identities don't match!", id.Recipient(), "!=", id.Recipient())
 		}
 		os.Remove(outfile)
 	}

@@ -9,6 +9,7 @@ import (
 
 	"filippo.io/age"
 	"git.burning.moe/celediel/agedit/internal/config"
+	"git.burning.moe/celediel/agedit/pkg/decrypt"
 	"git.burning.moe/celediel/agedit/pkg/editor"
 	"git.burning.moe/celediel/agedit/pkg/encrypt"
 	"git.burning.moe/celediel/agedit/pkg/env"
@@ -248,7 +249,7 @@ func action(ctx *cli.Context) error {
 	}
 
 	// try to decrypt the file
-	decrypted, err := encrypt.Decrypt(input_file, identities...)
+	decrypted, err := decrypt.Decrypt(input_file, identities...)
 	if err != nil {
 		return err
 	}
