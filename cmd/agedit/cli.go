@@ -242,15 +242,9 @@ func action(ctx *cli.Context) error {
 
 	// get recipients from specified identities
 	for _, id := range identities {
-		// TODO: figure out how age actually intends for
-		// TODO: a recpient to be retrieved from an age.Identity
-		// TODO: beccause this is stupid and I hate it
-		actual_id, err := age.ParseX25519Identity(fmt.Sprint(id))
-		if err != nil {
-			return fmt.Errorf("couldn't get recipient? %v", err)
+		if actual_id, ok := id.(*age.X25519Identity); ok {
+			recipients = append(recipients, actual_id.Recipient())
 		}
-
-		recipients = append(recipients, actual_id.Recipient())
 	}
 
 	// try to decrypt the file
