@@ -210,7 +210,7 @@ func action(ctx *cli.Context) error {
 	// read from identity file if exists and no identities have been supplied
 	if !gave_identities {
 		if _, err := os.Stat(cfg.IdentityFile); os.IsNotExist(err) {
-			return fmt.Errorf("identity file unset and no identities supplied, use -i to specify an idenitity file or set one in the config file, or use -I to specify an age private key")
+			return fmt.Errorf("identity file unset and no identities supplied")
 		} else {
 			f, err := os.Open(cfg.IdentityFile)
 			if err != nil {
