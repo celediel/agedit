@@ -1,6 +1,7 @@
 package editor
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -17,6 +18,10 @@ type Editor struct {
 // EditFile opens the specified file in the configured editor
 func (e *Editor) EditFile(filename string) error {
 	args := append(e.Args, filename)
+
+	if e.Command == "" {
+		return fmt.Errorf("no editor set or detected")
+	}
 
 	cmd := exec.Command(e.Command, args...)
 	cmd.Stdin = os.Stdin
