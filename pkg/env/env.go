@@ -108,7 +108,12 @@ func make_path(paths ...string) string {
 	}
 
 	for _, path := range paths {
-		output.WriteString(path + sep)
+		// don't add / to the end if it's there
+		if strings.HasSuffix(path, sep) {
+			output.WriteString(path)
+		} else {
+			output.WriteString(path + sep)
+		}
 	}
 
 	return output.String()
