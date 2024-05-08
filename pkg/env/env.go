@@ -67,7 +67,7 @@ func GetDataDir(appname string) string {
 		if datahome := os.Getenv("XDG_DATA_HOME"); datahome != "" {
 			datadir = datahome
 		} else {
-			datadir = make_path(os.Getenv("HOME"), "local", "share")
+			datadir = make_path(os.Getenv("HOME"), ".local", "share")
 		}
 	}
 
