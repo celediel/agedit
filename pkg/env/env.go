@@ -2,9 +2,7 @@ package env
 
 import (
 	"os"
-	"regexp"
 	"runtime"
-	"strings"
 )
 
 // GetEditor gets the configured editor by checking environmental
