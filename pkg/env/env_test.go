@@ -11,7 +11,7 @@ var (
 
 func clearEnvForNow() {
 	for _, item := range []string{"EDITOR", "VISUAL"} {
-		os.Setenv(item, "")
+		os.Unsetenv(item)
 	}
 }
 
