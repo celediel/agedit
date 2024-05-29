@@ -14,6 +14,7 @@ import (
 	"git.burning.moe/celediel/agedit/pkg/encrypt"
 	"git.burning.moe/celediel/agedit/pkg/env"
 
+	"github.com/adrg/xdg"
 	"github.com/charmbracelet/log"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/urfave/cli/v2"
@@ -39,6 +40,7 @@ COPYRIGHT:
    {{.Copyright}}
    {{end}}
 `
+	sep string = string(os.PathSeparator)
 )
 
 var (
@@ -170,7 +172,7 @@ func before(ctx *cli.Context) error {
 	// set some defaults
 	cfg = config.Defaults
 	cfg.Editor = env.GetEditor()
-	cfg_dir := env.GetConfigDir(name)
+	cfg_dir := xdg.ConfigHome + sep + name + sep
 	cfg.IdentityFile = cfg_dir + "identity.key"
 	configFile = cfg_dir + name + ".yaml"
 	logger = log.NewWithOptions(os.Stderr, log.Options{
