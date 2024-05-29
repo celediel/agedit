@@ -13,10 +13,10 @@ import (
 // variables EDITOR and VISUAL
 func GetEditor() string {
 	var editor string
-	if os.Getenv("EDITOR") != "" {
-		editor = os.Getenv("EDITOR")
-	} else if os.Getenv("VISUAL") != "" {
-		editor = os.Getenv("VISUAL")
+	if v, ok := os.LookupEnv("EDITOR"); ok {
+		editor = v
+	} else if v, ok := os.LookupEnv("VISUAL"); ok {
+		editor = v
 	} /* else {
 		// TODO: maybe pick something based on the OS
 	} */
