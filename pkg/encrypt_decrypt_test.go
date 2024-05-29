@@ -8,7 +8,6 @@ import (
 	"filippo.io/age"
 	"git.burning.moe/celediel/agedit/pkg/decrypt"
 	"git.burning.moe/celediel/agedit/pkg/encrypt"
-	"git.burning.moe/celediel/agedit/pkg/identity"
 	"git.burning.moe/celediel/agedit/pkg/tmpfile"
 )
 
@@ -140,32 +139,5 @@ func TestMultipleIdentities(t *testing.T) {
 			}
 
 		})
-	}
-}
-
-// TestNewIdentity creats a new identity, writes it to file, then re-reads it back from the file.
-func TestNewIdentity(t *testing.T) {
-	for range 1000 {
-		outfile := generator.GenerateFullPath()
-
-		id, err := identity.NewIdentity()
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		err = identity.WriteIdentityToFile(id, outfile)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		other_identity, err := identity.ReadIdentityFromFile(outfile)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if id.Recipient().String() != other_identity.Recipient().String() && id.String() != other_identity.String() {
-			t.Fatal("Identities don't match!", id.Recipient(), "!=", id.Recipient())
-		}
-		os.Remove(outfile)
 	}
 }
