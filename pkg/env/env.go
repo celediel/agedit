@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+
+	"github.com/adrg/xdg"
 )
 
 // GetEditor gets the configured editor by checking environmental
@@ -28,24 +30,7 @@ func GetEditor() string {
 //
 // On UNIX-like systems, $XDG_CONFIG_HOME/agedit is tried, if it isn't defined, $HOME/.config/agedit is used
 func GetConfigDir(appname string) string {
-	var configdir string
-	switch runtime.GOOS {
-	case "windows":
-		configdir = os.Getenv("APPDATA")
-	default:
-		fallthrough
-	case "darwin":
-		// TODO: figure out the proper Mac OS local directories
-		fallthrough
-	case "linux":
-		if confighome := os.Getenv("XDG_CONFIG_HOME"); confighome != "" {
-			configdir = confighome
-		} else {
-			configdir = make_path(os.Getenv("HOME"), ".config")
-		}
-	}
-
-	return make_path(configdir, appname)
+	return make_path(xdg.ConfigHome, appname)
 }
 
 // GetConfigDir gets a config directory based from environmental variables + the app name
@@ -54,24 +39,7 @@ func GetConfigDir(appname string) string {
 //
 // On UNIX-like systems, $XDG_DATA_HOME/agedit is tried, if it isn't defined, $HOME/.local/share/agedit is used
 func GetDataDir(appname string) string {
-	var datadir string
-	switch runtime.GOOS {
-	case "windows":
-		datadir = os.Getenv("LOCALAPPDATA")
-	default:
-		fallthrough
-	case "darwin":
-		// TODO: also here
-		fallthrough
-	case "linux":
-		if datahome := os.Getenv("XDG_DATA_HOME"); datahome != "" {
-			datadir = datahome
-		} else {
-			datadir = make_path(os.Getenv("HOME"), ".local", "share")
-		}
-	}
-
-	return make_path(datadir, appname)
+	return make_path(xdg.DataHome, appname)
 }
 
 // GetTempDirectory returns the systems temporary directory

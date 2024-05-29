@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	filippo.io/age v1.1.1
+	github.com/adrg/xdg v0.4.0
 	github.com/charmbracelet/log v0.4.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/urfave/cli/v2 v2.27.1
